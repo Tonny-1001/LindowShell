@@ -1,0 +1,15 @@
+<startofprompt>╭─[{style.MAGENTA}{login}{style.RESET}]~[{style.GREEN}{cdir}{style.RESET}]{nline}╰─►<endofprompt>
+
+styles:
+    MAGENTA, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, UNDERLINE, LIGHT
+    !! After using color you need to reset it with {style.RESET} !!
+
+syntax:
+    !! Prompt should be written in one line. Write it between start and end tokens !!
+    {login}    - Current user name
+    {mname}    - Machine name
+    {cdir}     - Current working directory
+    {nline}    - New line
+    {style.X}  - X is color of text
+
+Default prompt: ╭─[{style.MAGENTA}{login}{style.RESET}]~[{style.GREEN}{cdir}{style.RESET}]{nline}╰─►
