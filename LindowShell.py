@@ -46,7 +46,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 python_script_path = os.path.dirname(sys.argv[0])
-__version__ = "v1.4.4"
+__version__ = "v1.4.5"
 selector = selectors.SelectSelector()
 loop = asyncio.SelectorEventLoop(selector)
 asyncio.set_event_loop(loop)
@@ -193,7 +193,6 @@ def shell():
 
     elif cmd["cmd"] == "free":
         free(cmd["options"])
-
     else:
         if cmd["cmd"] != "dir" and cmd["cmd"] != "cls" and cmd["cmd"] != "help" and cmd["cmd"] != "cmd":
             if not cmd["arg"] and not cmd["options"]:

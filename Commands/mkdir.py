@@ -29,11 +29,18 @@ def mkdir(args, options, path):
     if "help" in options:
         return print_in_frame(help_mkdir_msg)
 
-    try:
-        dir_name = args
-    except IndexError:
+    if len(args) == 0:
         return print(f"{style.RED}You need to specify directory name!{style.RESET}")
 
-    os.chdir(path)
-    dir_name = dir_name.replace("/", "\\")
-    os.system(f"mkdir {dir_name}")
+    if len(args) > 1:
+        for dir_name in args:
+            os.chdir(path)
+            dir_name = dir_name.replace("/", "\\")
+            os.system(f"mkdir {dir_name}")
+    else:
+        dir_name = args[0]
+        os.chdir(path)
+        dir_name = dir_name.replace("/", "\\")
+        os.system(f'mkdir "{dir_name}"')
+
+

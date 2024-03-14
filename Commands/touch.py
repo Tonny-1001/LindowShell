@@ -28,10 +28,14 @@ def touch(args, options, path):
     if "help" in options:
         return print_in_frame(help_touch_msg)
 
-    try:
-        file_name = args[0]
-    except IndexError:
+    if len(args) == 0:
         return print(f"{style.RED}You need to specify file name!{style.RESET}")
 
-    with open(path + "\\" + file_name, "w", encoding="utf-8") as f:
-        f.close()
+    if len(args) > 1:
+        for file_name in args:
+            with open(path + "\\" + file_name, "w", encoding="utf-8") as f:
+                f.close()
+    else:
+        file_name = args[0]
+        with open(path + "\\" + file_name, "w", encoding="utf-8") as f:
+            f.close()

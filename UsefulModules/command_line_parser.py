@@ -73,13 +73,16 @@ def parse(text, python_script_path, user_path=None):
         arg.append(i)
     arg = list(filter(None, arg))
 
-    if cmd.lower() == "mkdir" or cmd.lower() == "rm":
-        if text.count('"') % 2 == 0 and text.count('"') != 0:
-            file_name = '"'+str(" ".join(arg))+'"'
-        else:
-            file_name = str(" ".join(arg))
-        parsed = {"cmd": cmd.lower(), "arg": file_name, "options": options}
-    else:
-        parsed = {"cmd": cmd.lower(), "arg": arg, "options": options}
+    parsed = {"cmd": cmd.lower(), "arg": arg, "options": options}
+
+    # if cmd.lower() == "mkdir":
+    #     if text.count('"') % 2 == 0 and text.count('"') != 0:
+    #         file_name = '"'+str(" ".join(arg))+'"'
+    #     else:
+    #         file_name = str(" ".join(arg))
+    #     parsed = {"cmd": cmd.lower(), "arg": file_name, "options": options}
+    # else:
+    #     parsed = {"cmd": cmd.lower(), "arg": arg, "options": options}
+
     # It returns dict of data
     return parsed

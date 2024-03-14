@@ -1,3 +1,12 @@
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+#
+# BY: Tonny-1001
+#
+#
+# This project can be used freely for all uses, as long as they maintain the
+# respective credits.
+#
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 
 def parse_prompt_style(file):

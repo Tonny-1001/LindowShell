@@ -30,38 +30,38 @@ def rm(args, options, path):
     if "help" in options:
         return print_in_frame(help_rm_msg)
 
-    try:
-        file_name = args
-    except IndexError:
+    if len(args) == 0:
         return print(f"{style.RED}You need to specify file name!{style.RESET}")
 
-    try:
-        if file_name.count('"') % 2 != 0 or file_name.count('"') == 0:
-            file_names = file_name.split(" ")
-            for file in file_names:
+    if len(args) > 1:
+        for file in args:
+            try:
                 try:
+                    os.remove(path + "\\" + file)
+                except PermissionError:
                     try:
-                        os.remove(path + "\\" + file)
-                    except PermissionError:
-                        try:
-                            os.rmdir(path + "\\" + file)
-                        except OSError:
-                            if "r" in options or "recursive" in options:
-                                shutil.rmtree(path + "\\" + file)
-                            else:
-                                print(style.RED + f"The directory is not empty: `{file}`" + style.RESET)
-                except FileNotFoundError:
-                    print(style.RED + f"File not found: `{file}`" + style.RESET)
-        else:
-            file_name = file_name.replace('"', "")
-            os.remove(path+"\\"+file_name)
-    except PermissionError:
+                        os.rmdir(path + "\\" + file)
+                    except OSError:
+                        if "r" in options or "recursive" in options:
+                            shutil.rmtree(path + "\\" + file)
+                        else:
+                            print(style.RED + f"The directory is not empty: `{file}`" + style.RESET)
+            except FileNotFoundError:
+                print(style.RED + f"File not found: `{file}`" + style.RESET)
+    else:
+        file = args[0]
         try:
-            os.rmdir(path + "\\" + file_name)
-        except OSError:
-            if "r" in options or "recursive" in options:
-                shutil.rmtree(path+"\\"+file_name)
-            else:
-                print(style.RED + f"The directory is not empty: {file_name}" + style.RESET)
-    except FileNotFoundError:
-        print(style.RED + f"File not found: `{file_name}`" + style.RESET)
+            try:
+                os.remove(path + "\\" + file)
+            except PermissionError:
+                try:
+                    os.rmdir(path + "\\" + file)
+                except OSError:
+                    if "r" in options or "recursive" in options:
+                        shutil.rmtree(path + "\\" + file)
+                    else:
+                        print(style.RED + f"The directory is not empty: `{file}`" + style.RESET)
+            except OSError:
+                print(style.RED + f"File not found: `{file}`" + style.RESET)
+        except FileNotFoundError:
+            print(style.RED + f"File not found: `{file}`" + style.RESET)
