@@ -16,7 +16,8 @@ Commands:
     cat     - Prints content of text file.
     cd      - Goes to specified directory.
     clear   - Clears console.
-    cp      - Copies file/directory to specified directory
+    cp      - Copies file/directory to specified directory.
+    env     - Activates virtual environment for python programs.
     free    - Prints info about memory.
     help    - Prints help to specified command.
     history - Prints saved session history.
@@ -236,5 +237,17 @@ Options:
     -k, --kilo    Displays amount of memory in kilobytes (default).
     -m, --mega    Displays amount of memory in megabytes.
     -g, --giga    Displays amount of memory in gigabytes.
+    --help        Displays information about the command.
+    """
+
+help_env_msg = \
+    """
+Activates selected venv for python programs. 
+If you dont pass any arguments command will display information about active venv.
+
+Syntax:
+    env [activate_file]
+
+Options:
     --help        Displays information about the command.
     """

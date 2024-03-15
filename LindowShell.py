@@ -10,6 +10,7 @@
 
 import os
 import json
+import subprocess
 from sys import exit
 import sys
 import asyncio
@@ -36,6 +37,7 @@ from Commands.aliases import aliases
 from Commands.history import history
 from Commands.ulib import ulib
 from Commands.free import free
+from Commands.env import env
 
 from prompt_toolkit.completion import Completer, PathCompleter, Completion
 from prompt_toolkit.document import Document
@@ -46,7 +48,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 python_script_path = os.path.dirname(sys.argv[0])
-__version__ = "v1.4.5"
+__version__ = "v1.4.6"
 selector = selectors.SelectSelector()
 loop = asyncio.SelectorEventLoop(selector)
 asyncio.set_event_loop(loop)
@@ -54,6 +56,10 @@ asyncio.set_event_loop(loop)
 
 class UsefulTable:
     last_cmd = ""
+    active_venv = [False, ""]
+
+
+UsefulObject = UsefulTable()
 
 
 class CommandCompleter(Completer):
@@ -86,8 +92,20 @@ class CommandCompleter(Completer):
                         for completion in self.path_completer.get_completions(sub_doc, complete_event, ))
 
 
+def run_with_venv(venv_path, program, *args):
+    """
+    Runs a python program using the specified virtual environment.
+    """
+    command = [venv_path+"\\python.exe", program] + list(args)
+
+    # Run the program using subprocess
+    subprocess.run(command)
+
+
 def shell():
-    """When function is called it executes one command."""
+    """
+    When function is called it executes one command.
+    """
 
     # open files that are important
     try:
@@ -100,20 +118,24 @@ def shell():
         current_directory = f.read()
 
     # just chilling here
-    parsed_promt = ""
+    parsed_prompt = ""
 
-    # try to parse and use style from promt style file. If there's error return and don't start shell.
+    # try to parse and use style from prompt style file. If there's error return and don't start shell.
     try:
-        parsed_promt = parse_prompt_style(f"{python_script_path}\\Config\\prompt_style")
-        parsed_promt = parsed_promt.format(login=os.getlogin(), style=style, cdir=current_directory, nline="\n",
-                                           mname=os.environ['COMPUTERNAME'])
+        parsed_prompt = parse_prompt_style(f"{python_script_path}\\Config\\prompt_style")
+        if UsefulObject.active_venv[0]:
+            parsed_prompt = parsed_prompt.format(login=os.getlogin(), style=style, cdir=current_directory, nline="\n",
+                                                 mname=os.environ['COMPUTERNAME'], venv="(venv) ")
+        else:
+            parsed_prompt = parsed_prompt.format(login=os.getlogin(), style=style, cdir=current_directory, nline="\n",
+                                               mname=os.environ['COMPUTERNAME'], venv="")
     except Exception:
         print("Error in prompt_style file!")
-        input()
+        input("Press enter to exit...")
         exit()
 
-    # cmd input promt wow
-    cmd_in = session.prompt(ANSI(f"\n{parsed_promt} "),
+    # cmd input prompt wow
+    cmd_in = session.prompt(ANSI(f"\n{parsed_prompt} "),
         completer=CommandCompleter(user_path=f"C:\\Users\\{os.getlogin()}"),
         complete_style=CompleteStyle.READLINE_LIKE, auto_suggest=AutoSuggestFromHistory())
 
@@ -168,7 +190,11 @@ def shell():
         pwd(f"{python_script_path}\\path", cmd["options"])
 
     elif cmd["cmd"] == "exit":
-        exit("Exited.")
+        if UsefulObject.active_venv[0]:
+            UsefulObject.active_venv = [False, ""]
+            print("Exited.")
+        else:
+            exit("Exited.")
 
     elif cmd["cmd"] == "cd":
         cd(cmd['arg'], cmd['options'])
@@ -193,20 +219,25 @@ def shell():
 
     elif cmd["cmd"] == "free":
         free(cmd["options"])
+
+    elif cmd["cmd"] == "env":
+        env(cmd["arg"], cmd["options"], current_directory, UsefulObject)
+
     else:
         if cmd["cmd"] != "dir" and cmd["cmd"] != "cls" and cmd["cmd"] != "help" and cmd["cmd"] != "cmd":
             if not cmd["arg"] and not cmd["options"]:
-                os.system(cmd_in)
+                if UsefulObject.active_venv[0]:
+                    if cmd_in.endswith(".py"):
+                        run_with_venv(UsefulObject.active_venv[1], cmd_in)
+                    else:
+                        os.system(cmd_in)
+                else:
+                    os.system(cmd_in)
             else:
                 if cmd_in in aliases_json:
                     os.system(aliases_json[cmd_in])
                 else:
-                    # with open(f"{python_script_path}\\path", "r") as f:
-                    #     cur_path = f.read()
-                    # tmp_path = os.getcwd()
-                    # os.chdir(cur_path)
                     os.system(cmd_in)
-                    # os.chdir(tmp_path)
 
         else:
             print(style.RED + "Unresolved command." + style.RESET)

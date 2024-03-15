@@ -71,6 +71,9 @@ def help_(cmd=None):
         elif cmd == "free":
             print_in_frame(help_free_msg)
 
+        elif cmd == "env":
+            print_in_frame(help_env_msg)
+
         else:
             try:
                 subprocess.run(['help', cmd])

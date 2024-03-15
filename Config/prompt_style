@@ -1,4 +1,4 @@
-<startofprompt>╭─[{style.MAGENTA}{login}{style.RESET}]~[{style.GREEN}{cdir}{style.RESET}]{nline}╰─►<endofprompt>
+<startofprompt>╭─[{style.MAGENTA}{login}{style.RESET}]~[{venv}{style.GREEN}{cdir}{style.RESET}]{nline}╰─►<endofprompt>
 
 styles:
     MAGENTA, BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, UNDERLINE, LIGHT
@@ -11,5 +11,6 @@ syntax:
     {cdir}     - Current working directory
     {nline}    - New line
     {style.X}  - X is color of text
+    {venv}     - It shows when venv is activated
 
-Default prompt: ╭─[{style.MAGENTA}{login}{style.RESET}]~[{style.GREEN}{cdir}{style.RESET}]{nline}╰─►
+Default prompt: ╭─[{style.MAGENTA}{login}{style.RESET}]~[{venv}{style.GREEN}{cdir}{style.RESET}]{nline}╰─►
