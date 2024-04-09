@@ -48,7 +48,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 python_script_path = os.path.dirname(sys.argv[0])
-__version__ = "v1.4.6"
+__version__ = "v1.4.7"
 selector = selectors.SelectSelector()
 loop = asyncio.SelectorEventLoop(selector)
 asyncio.set_event_loop(loop)
@@ -96,10 +96,13 @@ def run_with_venv(venv_path, program, *args):
     """
     Runs a python program using the specified virtual environment.
     """
-    command = [venv_path+"\\python.exe", program] + list(args)
+    command = [venv_path+"\\Scripts\\python.exe", program] + list(args)
 
     # Run the program using subprocess
-    subprocess.run(command)
+    try:
+        subprocess.run(command)
+    except FileNotFoundError:
+        print("Bad venv!\n(Make sure venv is up to date and it consists of correct path.)")
 
 
 def shell():
@@ -192,7 +195,7 @@ def shell():
     elif cmd["cmd"] == "exit":
         if UsefulObject.active_venv[0]:
             UsefulObject.active_venv = [False, ""]
-            print("Exited.")
+            print("(venv) Exited.")
         else:
             exit("Exited.")
 

@@ -45,7 +45,7 @@ def env(args, options, path, instance):
                 file_lines = f.readlines()
             for line in file_lines:
                 if "VIRTUAL_ENV=" in line:
-                    path = line.split("=")[1].replace("'", "").replace('"', "")
+                    path = line.split("=")[1].replace("'", "").replace('"', "").replace("\n", "")
                     break
 
             instance.active_venv = [True, path]
