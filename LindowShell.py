@@ -48,7 +48,7 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 python_script_path = os.path.dirname(sys.argv[0])
-__version__ = "v1.4.7"
+__version__ = "v1.4.8"
 selector = selectors.SelectSelector()
 loop = asyncio.SelectorEventLoop(selector)
 asyncio.set_event_loop(loop)
@@ -92,17 +92,21 @@ class CommandCompleter(Completer):
                         for completion in self.path_completer.get_completions(sub_doc, complete_event, ))
 
 
-def run_with_venv(venv_path, program, *args):
+def run_with_venv(venv_path, program, args=None):
     """
     Runs a python program using the specified virtual environment.
     """
-    command = [venv_path+"\\Scripts\\python.exe", program] + list(args)
+    if args is None:
+        args = []
+    command = [venv_path+"\\Scripts\\python.exe", program] + args
 
     # Run the program using subprocess
     try:
         subprocess.run(command)
     except FileNotFoundError:
         print("Bad venv!\n(Make sure venv is up to date and it consists of correct path.)")
+    except Exception as e:
+        print("Unknown error occurred:", e)
 
 
 def shell():
@@ -237,10 +241,19 @@ def shell():
                 else:
                     os.system(cmd_in)
             else:
-                if cmd_in in aliases_json:
-                    os.system(aliases_json[cmd_in])
+                if UsefulObject.active_venv[0]:
+                    if cmd["cmd"].endswith(".py"):
+                        run_with_venv(UsefulObject.active_venv[1], cmd["cmd"], cmd["arg"])
+                    else:
+                        if cmd_in in aliases_json:
+                            os.system(aliases_json[cmd_in])
+                        else:
+                            os.system(cmd_in)
                 else:
-                    os.system(cmd_in)
+                    if cmd_in in aliases_json:
+                        os.system(aliases_json[cmd_in])
+                    else:
+                        os.system(cmd_in)
 
         else:
             print(style.RED + "Unresolved command." + style.RESET)
@@ -252,8 +265,13 @@ if __name__ == "__main__":
     with open(f"{python_script_path}\\path", "w") as f:
         f.write(os.getcwd())
 
-    with open(f"{python_script_path}\\Config\\session-history", "w") as f:
-        f.write("")
+    try:
+        with open(f"{python_script_path}\\Config\\session-history", "w") as f:
+            f.write("")
+    except FileNotFoundError:
+        print("Config folder not found.")
+        input("Press enter to close...")
+        exit()
 
     history_file = FileHistory(f"{python_script_path}\\Config\\session-history")
     session = PromptSession(history=history_file)

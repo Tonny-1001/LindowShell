@@ -24,17 +24,17 @@ def env(args, options, path, instance):
             elif len(opt) == 1:
                 opt = f"-{opt}"
             return print(f"{style.RED}Unknown option was used: '{opt}'. "
-                         f"\nUse 'aenv --help' to get list of available options.{style.RESET}")
+                         f"\nUse 'env --help' to get list of available options.{style.RESET}")
 
     if "help" in options:
         return print_in_frame(help_env_msg)
 
     if len(args) == 0:
         if instance.active_venv[0]:
-            print(f"Is active?   : Yes")
+            print(f"Is active?   : {style.GREEN}Yes{style.RESET}")
             print(f"Active venv  : {instance.active_venv[1]}")
         else:
-            print(f"Is active?   : No")
+            print(f"Is active?   : {style.RED}No{style.RESET}")
             print(f"Active venv  : -")
 
     elif len(args) == 1:
