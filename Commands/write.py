@@ -15,7 +15,7 @@ from UsefulModules.styling import style
 available_options = ["help"]
 
 
-def write(args, options, path):
+def write(args, options, current_directory):
     for opt in options:
         if opt not in available_options:
             if len(opt) > 1:
@@ -44,7 +44,7 @@ def write(args, options, path):
 
     try:
         for line in lines:
-            with open(path + "\\" + file_name, "a", encoding="UTF-8") as f:
+            with open(current_directory + "\\" + file_name, "a", encoding="UTF-8") as f:
                 f.write(line + "\n")
     except FileNotFoundError:
         print(f"{style.RED}File not found!{style.RESET}")

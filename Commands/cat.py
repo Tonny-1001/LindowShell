@@ -16,7 +16,7 @@ from UsefulModules.help_msgs import help_cat_msg
 available_options = ["f", "framed", "help"]
 
 
-def cat(args, options, cur_path):
+def cat(args, options, current_directory):
     for opt in options:
         if opt not in available_options:
             if len(opt) > 1:
@@ -30,23 +30,21 @@ def cat(args, options, cur_path):
         return print_in_frame(help_cat_msg)
 
     try:
-        file = args[0]
+        file_name = args[0]
     except IndexError:
         return print(f"{style.RED}You need to specify file name!{style.RESET}")
 
     if "f" in options or "framed" in options:
         try:
-            os.chdir(cur_path)
-            with open(file, "r", encoding="utf-8") as f:
-                print_in_frame(f.read(), f"File: {file}")
+            with open(current_directory + "\\" + file_name, "r", encoding="utf-8") as f:
+                print_in_frame(f.read(), f"File: {file_name}")
         except FileNotFoundError:
             return print(f"{style.RED}File not found!{style.RESET}")
         except Exception:
             return print(f"{style.RED}Not a text file or bad encoding!{style.RESET}")
     else:
         try:
-            os.chdir(cur_path)
-            with open(file, "r", encoding="utf-8") as f:
+            with open(current_directory + "\\" + file_name, "r", encoding="utf-8") as f:
                 print(f.read())
         except FileNotFoundError:
             return print(f"{style.RED}File not found!{style.RESET}")

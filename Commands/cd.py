@@ -17,9 +17,7 @@ import re
 available_options = ["help"]
 
 
-def cd(args, options):
-    from LindowShell import python_script_path
-
+def cd(args, options, current_directory, os):
     for opt in options:
         if opt not in available_options:
             if len(opt) > 1:
@@ -37,39 +35,32 @@ def cd(args, options):
     except IndexError:
         return print(f"{style.RED}You need to specify destination!{style.RESET}")
 
-    with open(f"{python_script_path}\\path", "r") as f:
-        cur_path = f.read()
     path = os.path.normpath(path.replace("/", "\\"))
-    if os.path.exists(cur_path + f"\\{path}") and os.path.isdir(cur_path + f"\\{path}"):
-        if len(cur_path) == 2:
+    if os.path.exists(current_directory + f"\\{path}") and os.path.isdir(current_directory + f"\\{path}"):
+        if len(current_directory) == 2:
             pass
         else:
             if ".." in path:
-                tmp = list(filter(None, cur_path.split("\\")))
+                tmp = list(filter(None, current_directory.split("\\")))
                 num = path.count("..")
                 if len(tmp) > num:
-                    with open(f"{python_script_path}\\path", "r") as f:
-                        tmp_path = list(filter(None, f.read().split("\\")))
-                        for i in range(num):
-                            tmp_path.pop(-1)
+                    tmp_path = list(filter(None, current_directory.split("\\")))
+                    for i in range(num):
+                        tmp_path.pop(-1)
 
-                    with open(f"{python_script_path}\\path", "w") as f:
-                        f.write(os.path.normpath("\\".join(tmp_path)+"\\"))
+                    os.chdir(os.path.normpath("\\".join(tmp_path)+"\\"))
 
         if ".." not in path:
-            if not cur_path.endswith("\\"):
-                with open(f"{python_script_path}\\path", "a") as f:
-                    f.write(os.path.normpath("\\"+path))
+            if not current_directory.endswith("\\"):
+                os.chdir(current_directory+os.path.normpath("\\"+path))
             else:
-                with open(f"{python_script_path}\\path", "a") as f:
-                    f.write(os.path.normpath(path))
+                os.chdir(current_directory+os.path.normpath(path))
     else:
         if re.match("^[A-Z]:\\.*", path) is not None:
             if os.path.exists(path):
                 if "\\" not in path:
                     path = path + "\\"
-                with open(f"{python_script_path}\\path", "w") as f:
-                    f.write(os.path.normpath(path))
+                os.chdir(os.path.normpath(path))
 
             else:
                 print(f"{style.RED}Directory does not exists.{style.RESET}")

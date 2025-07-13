@@ -47,7 +47,11 @@ def env(args, options, path, instance):
                 if "VIRTUAL_ENV=" in line:
                     path = line.split("=")[1].replace("'", "").replace('"', "").replace("\n", "")
                     break
-
+            
+            # adding venv to enviroment vars and saving the path to active_venv var
+            scripts_path = os.path.join(path, "Scripts")
+            os.environ["VIRTUAL_ENV"] = path
+            os.environ["PATH"] = scripts_path + os.pathsep + os.environ["PATH"]
             instance.active_venv = [True, path]
 
             print("Activated.")

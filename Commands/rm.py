@@ -17,7 +17,7 @@ from UsefulModules.styling import style
 available_options = ["r", "recursive", "help"]
 
 
-def rm(args, options, path):
+def rm(args, options, current_directory):
     for opt in options:
         if opt not in available_options:
             if len(opt) > 1:
@@ -34,34 +34,34 @@ def rm(args, options, path):
         return print(f"{style.RED}You need to specify file name!{style.RESET}")
 
     if len(args) > 1:
-        for file in args:
+        for file_name in args:
             try:
                 try:
-                    os.remove(path + "\\" + file)
+                    os.remove(current_directory + "\\" + file_name)
                 except PermissionError:
                     try:
-                        os.rmdir(path + "\\" + file)
+                        os.rmdir(current_directory + "\\" + file_name)
                     except OSError:
                         if "r" in options or "recursive" in options:
-                            shutil.rmtree(path + "\\" + file)
+                            shutil.rmtree(current_directory + "\\" + file_name)
                         else:
-                            print(style.RED + f"The directory is not empty: `{file}`" + style.RESET)
+                            print(style.RED + f"The directory is not empty: `{file_name}`" + style.RESET)
             except FileNotFoundError:
-                print(style.RED + f"File not found: `{file}`" + style.RESET)
+                print(style.RED + f"File not found: `{file_name}`" + style.RESET)
     else:
-        file = args[0]
+        file_name = args[0]
         try:
             try:
-                os.remove(path + "\\" + file)
+                os.remove(current_directory + "\\" + file_name)
             except PermissionError:
                 try:
-                    os.rmdir(path + "\\" + file)
+                    os.rmdir(current_directory + "\\" + file_name)
                 except OSError:
                     if "r" in options or "recursive" in options:
-                        shutil.rmtree(path + "\\" + file)
+                        shutil.rmtree(current_directory + "\\" + file_name)
                     else:
-                        print(style.RED + f"The directory is not empty: `{file}`" + style.RESET)
+                        print(style.RED + f"The directory is not empty: `{file_name}`" + style.RESET)
             except OSError:
-                print(style.RED + f"File not found: `{file}`" + style.RESET)
+                print(style.RED + f"File not found: `{file_name}`" + style.RESET)
         except FileNotFoundError:
-            print(style.RED + f"File not found: `{file}`" + style.RESET)
+            print(style.RED + f"File not found: `{file_name}`" + style.RESET)

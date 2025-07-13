@@ -15,7 +15,7 @@ from UsefulModules.styling import style
 available_options = ["help"]
 
 
-def touch(args, options, path):
+def touch(args, options, current_directory):
     for opt in options:
         if opt not in available_options:
             if len(opt) > 1:
@@ -33,9 +33,9 @@ def touch(args, options, path):
 
     if len(args) > 1:
         for file_name in args:
-            with open(path + "\\" + file_name, "w", encoding="utf-8") as f:
+            with open(current_directory + "\\" + file_name, "w", encoding="utf-8") as f:
                 f.close()
     else:
         file_name = args[0]
-        with open(path + "\\" + file_name, "w", encoding="utf-8") as f:
+        with open(current_directory + "\\" + file_name, "w", encoding="utf-8") as f:
             f.close()

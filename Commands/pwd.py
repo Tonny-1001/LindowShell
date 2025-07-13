@@ -15,7 +15,7 @@ from UsefulModules.styling import style
 available_options = ["help"]
 
 
-def pwd(saved_path_file, options):
+def pwd(options, current_directory):
     for opt in options:
         if opt not in available_options:
             if len(opt) > 1:
@@ -28,7 +28,4 @@ def pwd(saved_path_file, options):
     if "help" in options:
         return print_in_frame(help_pwd_msg)
 
-    with open(saved_path_file, "r") as f:
-        cur_path = f.read()
-        f.close()
-    print(cur_path)
+    print(current_directory)

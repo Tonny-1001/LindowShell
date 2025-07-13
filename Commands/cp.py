@@ -17,7 +17,7 @@ import re
 available_options = ["help"]
 
 
-def cp(args, options, cur_path):
+def cp(args, options, current_directory):
     for opt in options:
         if opt not in available_options:
             if len(opt) > 1:
@@ -37,11 +37,11 @@ def cp(args, options, cur_path):
         return print(f"{style.RED}You need to specify source and destination!{style.RESET}")
 
     if src_path.count("/") == 0 or src_path.count("\\") == 0:
-        src_path = cur_path + "\\" + src_path
+        src_path = current_directory + "\\" + src_path
 
     if dest_path.count(":") == 0:
         if dest_path.count("/") == 0 or dest_path.count("\\") == 0:
-            dest_path = cur_path + "\\" + dest_path
+            dest_path = current_directory + "\\" + dest_path
     elif re.match("^[a-zA-Z]:$", dest_path) is not None:
         dest_path = dest_path + "\\"
 

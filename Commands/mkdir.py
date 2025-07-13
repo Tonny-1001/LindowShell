@@ -16,7 +16,7 @@ from UsefulModules.printing_in_frame import print_in_frame
 available_options = ["help"]
 
 
-def mkdir(args, options, path):
+def mkdir(args, options):
     for opt in options:
         if opt not in available_options:
             if len(opt) > 1:
@@ -34,12 +34,10 @@ def mkdir(args, options, path):
 
     if len(args) > 1:
         for dir_name in args:
-            os.chdir(path)
             dir_name = dir_name.replace("/", "\\")
             os.system(f"mkdir {dir_name}")
     else:
         dir_name = args[0]
-        os.chdir(path)
         dir_name = dir_name.replace("/", "\\")
         os.system(f'mkdir "{dir_name}"')
 

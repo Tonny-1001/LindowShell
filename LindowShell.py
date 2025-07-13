@@ -15,6 +15,7 @@ from sys import exit
 import sys
 import asyncio
 import selectors
+import atexit
 
 from UsefulModules.styling import style
 from UsefulModules.command_line_parser import parse
@@ -48,10 +49,25 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 python_script_path = os.path.dirname(sys.argv[0])
-__version__ = "v1.4.8"
+__version__ = "v1.4.9"
 selector = selectors.SelectSelector()
 loop = asyncio.SelectorEventLoop(selector)
 asyncio.set_event_loop(loop)
+
+
+def clear_history():
+    try:
+        with open(f"{python_script_path}\\Config\\settings.json", "r") as f:
+            settings = json.load(f)
+
+        if settings["clear_history_on_close"]:
+            with open(f"{python_script_path}\\Config\\session-history", "w") as f:
+                f.write("")
+    except Exception as e:
+        print(e)
+
+
+atexit.register(clear_history)
 
 
 class UsefulTable:
@@ -63,7 +79,9 @@ UsefulObject = UsefulTable()
 
 
 class CommandCompleter(Completer):
-    """Some magic stuff that is responsible for recursive file name completion."""
+    """
+    Some magic stuff that is responsible for recursive file name completion.
+    """
 
     def __init__(self, user_path=None):
         self.path_completer = PathCompleter()
@@ -91,7 +109,6 @@ class CommandCompleter(Completer):
             yield from (Completion(completion.text, completion.start_position, display=completion.display)
                         for completion in self.path_completer.get_completions(sub_doc, complete_event, ))
 
-
 def run_with_venv(venv_path, program, args=None):
     """
     Runs a python program using the specified virtual environment.
@@ -109,6 +126,21 @@ def run_with_venv(venv_path, program, args=None):
         print("Unknown error occurred:", e)
 
 
+def load_settings():
+    try:
+        with open(f"{python_script_path}\\Config\\settings.json", "r") as f:
+            settings = json.load(f)
+        assert type(settings["clear_history_on_close"]) == bool, "clear_history_on_close - accepted values true/false"
+        assert type(settings["anonymous_mode"]) == bool, "anonymous_mode - accepted values true/false"
+        return settings
+    except Exception as e:
+        print("Error in settings file:")
+        print(e)
+        print()
+        input("Press enter to exit...")
+        exit()
+
+
 def shell():
     """
     When function is called it executes one command.
@@ -121,32 +153,40 @@ def shell():
     except FileNotFoundError:
         pass
 
-    with open(f"{python_script_path}\\path", "r") as f:
-        current_directory = f.read()
+    settings = load_settings()
+
+    current_directory = os.getcwd()
 
     # just chilling here
     parsed_prompt = ""
 
     # try to parse and use style from prompt style file. If there's error return and don't start shell.
     try:
+        login = os.getlogin()
+        if settings["anonymous_mode"]:
+            login = "Anon"
+
         parsed_prompt = parse_prompt_style(f"{python_script_path}\\Config\\prompt_style")
         if UsefulObject.active_venv[0]:
-            parsed_prompt = parsed_prompt.format(login=os.getlogin(), style=style, cdir=current_directory, nline="\n",
+            parsed_prompt = parsed_prompt.format(login=login, style=style, cdir=current_directory, nline="\n",
                                                  mname=os.environ['COMPUTERNAME'], venv="(venv) ")
         else:
-            parsed_prompt = parsed_prompt.format(login=os.getlogin(), style=style, cdir=current_directory, nline="\n",
-                                               mname=os.environ['COMPUTERNAME'], venv="")
-    except Exception:
-        print("Error in prompt_style file!")
+            parsed_prompt = parsed_prompt.format(login=login, style=style, cdir=current_directory, nline="\n",
+                                                 mname=os.environ['COMPUTERNAME'], venv="")
+    except Exception as e:
+        print("Error in prompt_style file:")
+        print(e)
+        print()
         input("Press enter to exit...")
         exit()
 
     # cmd input prompt wow
     cmd_in = session.prompt(ANSI(f"\n{parsed_prompt} "),
-        completer=CommandCompleter(user_path=f"C:\\Users\\{os.getlogin()}"),
-        complete_style=CompleteStyle.READLINE_LIKE, auto_suggest=AutoSuggestFromHistory())
+                            completer=CommandCompleter(user_path=f"C:\\Users\\{os.getlogin()}"),
+                            complete_style=CompleteStyle.READLINE_LIKE, auto_suggest=AutoSuggestFromHistory())
 
     # replace !! with last command
+    # (maybe its stupid to use var but im lazy and i dont want to change it)
     cmd_in = cmd_in.replace("!!", UsefulTable.last_cmd)
 
     UsefulTable.last_cmd = cmd_in
@@ -194,23 +234,32 @@ def shell():
             help_(cmd["arg"][0])
 
     elif cmd["cmd"] == "pwd":
-        pwd(f"{python_script_path}\\path", cmd["options"])
+        pwd(cmd["options"], current_directory)
 
     elif cmd["cmd"] == "exit":
         if UsefulObject.active_venv[0]:
+            # Deleting venv from enviroment vars
+            venv_path = UsefulObject.active_venv[1]
+            scripts_path = os.path.join(venv_path, "Scripts")
+            path_parts = os.environ["PATH"].split(os.pathsep)
+            filtered_paths = []
+
+            for p in path_parts:
+                if scripts_path not in p:
+                    filtered_paths.append(p)
+
+            os.environ["PATH"] = os.pathsep.join(filtered_paths)
+            os.environ.pop("VIRTUAL_ENV", None)
             UsefulObject.active_venv = [False, ""]
             print("(venv) Exited.")
         else:
             exit("Exited.")
 
     elif cmd["cmd"] == "cd":
-        cd(cmd['arg'], cmd['options'])
-        with open(f"{python_script_path}\\path", "r") as f:
-            tmp_path = f.read()
-        os.chdir(tmp_path)
+        cd(cmd['arg'], cmd['options'], current_directory, os)
 
     elif cmd["cmd"] == "mkdir":
-        mkdir(cmd["arg"], cmd["options"], current_directory)
+        mkdir(cmd["arg"], cmd["options"])
 
     elif cmd["cmd"] == "alias":
         alias(cmd["arg"], cmd["options"])
@@ -256,19 +305,14 @@ def shell():
                         os.system(cmd_in)
 
         else:
-            print(style.RED + "Unresolved command." + style.RESET)
+            print(f"'{cmd['cmd']}' is not recognized as an internal or external command,\n"
+                  "operable program or batch file.")
 
 
 if __name__ == "__main__":
     # program entry
 
-    with open(f"{python_script_path}\\path", "w") as f:
-        f.write(os.getcwd())
-
-    try:
-        with open(f"{python_script_path}\\Config\\session-history", "w") as f:
-            f.write("")
-    except FileNotFoundError:
+    if not os.path.isdir(f"{python_script_path}\\Config"):
         print("Config folder not found.")
         input("Press enter to close...")
         exit()
